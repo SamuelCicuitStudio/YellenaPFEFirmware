@@ -1,7 +1,7 @@
 // Joystick.h
 
-#ifndef JOYSTICK_H
-#define JOYSTICK_H
+#ifndef JOYSTICKHTML_H
+#define JOYSTICKHTML_H
 
 const char* htmlContent = R"rawliteral(
 <!DOCTYPE html>
@@ -110,6 +110,8 @@ const char* htmlContent = R"rawliteral(
     const display = document.getElementById('display');
 
     let isMoving = false;
+    let lastX = 0;
+    let lastY = 0;
 
     function handleMouseMove(e) {
       if (isMoving) {
@@ -143,8 +145,14 @@ const char* htmlContent = R"rawliteral(
         // Update display
         display.textContent = `X: ${xPercent.toFixed(2)}, Y: ${yPercent.toFixed(2)}`;
 
-        // Send the joystick coordinates to the ESP32
-        fetch(`/move?x=${xPercent}&y=${yPercent}`);
+        // Check if the change is more than 5 units
+        if (Math.abs(xPercent - lastX) > 5 || Math.abs(yPercent - lastY) > 5) {
+          lastX = xPercent;
+          lastY = yPercent;
+
+          // Send the joystick coordinates to the ESP32
+          fetch(`/move?x=${xPercent}&y=${yPercent}`);
+        }
       }
     }
 
@@ -166,18 +174,23 @@ const char* htmlContent = R"rawliteral(
       
       // Reset display
       display.textContent = `X: 0, Y: 0`;
+      lastX = 0;
+      lastY = 0;
     }
 
     function resetJoystick() {
       stick.style.transform = 'translate(-50%, -50%)';
       display.textContent = `X: 0, Y: 0`;
       fetch(`/move?x=0&y=0`);
+      lastX = 0;
+      lastY = 0;
     }
 
     joystick.addEventListener('mousedown', handleMouseDown);
   </script>
 </body>
 </html>
+
 )rawliteral";
 
 #endif

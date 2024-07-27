@@ -1,6 +1,6 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
-#include "Joystick.h"  // Include the header file with HTML content
+#include "JoystickHTML.h"  // Include the header file with HTML content
 #include "Credential.h"
 
 // Create an instance of the server
@@ -13,8 +13,11 @@ void handleRoot(AsyncWebServerRequest *request) {
 
 // Handles joystick movement
 void handleMove(AsyncWebServerRequest *request) {
-  String x = request->getParam("x")->value();
-  String y = request->getParam("y")->value();
+  String xStr = request->getParam("x")->value();
+  String yStr = request->getParam("y")->value();
+  
+  int x = xStr.toInt();
+  int y = yStr.toInt();
 
   Serial.print("Joystick X: ");
   Serial.print(x);
@@ -24,8 +27,9 @@ void handleMove(AsyncWebServerRequest *request) {
   request->send(200, "text/plain", "OK");
 }
 
+
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   // Connect to Wi-Fi
   WiFi.begin(ssid, password);
