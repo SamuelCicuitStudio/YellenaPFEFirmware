@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Printer Control HMI</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #eaeaea;
+    }
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
+      border-radius: 10px;
+      background: #ffffff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border: 1px solid #dddddd;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+      font-size: 2em;
+      font-weight: 600;
+    }
+    .tabs {
+      display: flex;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+    .tab {
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px 5px 0 0;
+      background: #f0f0f0;
+      margin-right: 5px;
+      font-size: 1.1em;
+      text-align: center;
+    }
+    .tab.active {
+      background: #007bff;
+      color: white;
+    }
+    .tab-content {
+      display: none;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 0 0 5px 5px;
+      background: #f9f9f9;
+      overflow: auto;
+      max-height: 60vh;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .joystick-section {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+    .joystick-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .joystick {
+      width: 130px;
+      height: 130px;
+      background: radial-gradient(circle, #dcdcdc, #b0b0b0);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stick {
+      width: 45px;
+      height: 45px;
+      background: #333;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+      transition: transform 0.2s ease-out;
+    }
+    .display {
+      margin-top: 10px;
+      font-size: 1.1em;
+      color: #555;
+      text-align: center;
+      font-weight: 500;
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 15px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: block;
+      margin-top: 10px;
+    }
+    .button:hover {
+      background-color: #0056b3;
+    }
+    .parameter-item, .status-item {
+  margin-bottom: 20px; /* Increased margin for better spacing */
+}
+
+.parameter-item label, .status-item label {
+  display: block;
+  margin-bottom: 8px; /* Slightly increased margin for better separation */
+  font-weight: 600;
+  font-size: 1.1em; /* Increased font size for better readability */
+  color: #333; /* Darker color for better contrast */
+}
+
+.parameter-item input, .parameter-item select {
+  width: calc(100% - 20px); /* Full width minus padding */
+  padding: 10px; /* Increased padding for better touch targets */
+  border: 1px solid #ddd; /* Lighter border color */
+  border-radius: 8px; /* Slightly larger border-radius for a modern look */
+  font-size: 1em; /* Increased font size for better readability */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added shadow for a subtle 3D effect */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition effects */
+}
+
+.parameter-item input:focus, .parameter-item select:focus {
+  border-color: #007bff; /* Change border color on focus */
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.5); /* Highlight on focus */
+  outline: none; /* Remove default outline */
+}
+
+.status-item {
+  background-color: #f9f9f9; /* Light background color for status items */
+  padding: 10px; /* Padding inside status items */
+  border: 1px solid #ddd; /* Border to distinguish status items */
+  border-radius: 5px; /* Matching border-radius */
+}
+
+    .status-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .status-card {
+      flex: 1;
+      min-width: 160px;
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .status-card h4 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 1.1em;
+      color: #333;
+    }
+    .status-card p {
+      margin: 3px 0;
+      font-size: 0.9em;
+      color: #555;
+    }
+    .time-display {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin: 10px 0;
+      text-align: center;
+      color: #333;
+    }
+    .mode-control {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .mode-control input[type="radio"] {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Printer Manual Control</h2>
+
+    <div class="tabs">
+      <div class="tab active" data-target="joystick-tab">Joystick Control</div>
+      <div class="tab" data-target="status-tab">Status</div>
+      <div class="tab" data-target="settings-tab">Settings</div>
+    </div>
+
+    <div class="tab-content active" id="joystick-tab">
+      <div class="mode-control">
+        <label><input type="radio" name="mode" value="manual" checked> Manual</label>
+        <label><input type="radio" name="mode" value="auto"> Auto</label>
+      </div>
+      <div class="joystick-section">
+        <div class="joystick-container">
+          <div class="joystick" id="joystickXY">
+            <div class="stick" id="stickXY"></div>
+          </div>
+          <div class="display" id="displayXY">X: 0, Y: 0</div>
+        </div>
+        <div class="joystick-container">
+          <div class="joystick" id="joystickZ">
+            <div class="stick" id="stickZ"></div>
+          </div>
+          <div class="display" id="displayZ">Z: 0</div>
+        </div>
+      </div>
+      <button class="button" onclick="restartPrinter()">Restart Printer</button>
+    </div>
+
+    <div class="tab-content" id="status-tab">
+      <div class="status-section">
+        <div class="status-card">
+          <h4>Fan Speed</h4>
+          <p id="statusFanSpeed">N/A</p>
+        </div>
+        <div class="status-card">
+          <h4>Stepper Speed</h4>
+          <p id="statusStepperSpeed">N/A</p>
+        </div>
+        <div class="status-card">
+          <h4>Bed Temperature</h4>
+          <p id="statusBedTemperature">N/A</p>
+        </div>
+        <div class="status-card">
+          <h4>Head Temperature</h4>
+          <p id="statusHeadTemperature">N/A</p>
+        </div>
+        <div class="status-card">
+          <h4>Print Speed</h4>
+          <p id="statusPrintSpeed">N/A</p>
+        </div>
+        <div class="status-card">
+          <h4>Layer Height</h4>
+          <p id="statusLayerHeight">N/A</p>
+        </div>
+        <div class="status-card">
+          <h4>Filament Type</h4>
+          <p id="statusFilamentType">N/A</p>
+        </div>
+        <div class="status-card">
+          <h4>Extruder Temperature</h4>
+          <p id="statusExtruderTemperature">N/A</p>
+        </div>
+        <div class="status-card">
+          <h4>Time & Date</h4>
+          <p id="currentDateTime">N/A</p>
+          
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="settings-tab">
+      <div class="parameter-section">
+         <div class="parameter-item">
+          <label for="fanSpeed">Fan Speed:</label>
+          <input type="number" id="fanSpeed" name="fanSpeed" min="0" max="100">
+        </div>
+        <div class="parameter-item">
+          <label for="stepperSpeed">Stepper Speed:</label>
+          <input type="number" id="stepperSpeed" name="stepperSpeed" min="0" max="100">
+        </div>
+        <div class="parameter-item">
+          <label for="bedTemperature">Bed Temperature:</label>
+          <input type="number" id="bedTemperature" name="bedTemperature" min="0" max="300">
+        </div>
+        <div class="parameter-item">
+          <label for="headTemperature">Head Temperature:</label>
+          <input type="number" id="headTemperature" name="headTemperature" min="0" max="300">
+        </div>
+        <div class="parameter-item">
+          <label for="printSpeed">Print Speed:</label>
+          <input type="number" id="printSpeed" name="printSpeed" min="0" max="100">
+        </div>
+        <div class="parameter-item">
+          <label for="layerHeight">Layer Height:</label>
+          <input type="number" id="layerHeight" name="layerHeight" step="0.01" min="0" max="10">
+        </div>
+        <div class="parameter-item">
+          <label for="filamentType">Filament Type:</label>
+          <select id="filamentType" name="filamentType">
+            <option value="PLA">PLA</option>
+            <option value="ABS">ABS</option>
+            <option value="PETG">PETG</option>
+            <option value="Nylon">Nylon</option>
+          </select>
+        </div>
+        <div class="parameter-item">
+          <label for="extruderTemperature">Extruder Temperature:</label>
+          <input type="number" id="extruderTemperature" name="extruderTemperature" min="0" max="300">
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Handle tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab, .tab-content').forEach(el => {
+          el.classList.remove('active');
+        });
+        tab.classList.add('active');
+        document.getElementById(tab.getAttribute('data-target')).classList.add('active');
+      });
+    });
+  
+    // Handle joystick movement
+    const joystickXY = document.getElementById('joystickXY');
+    const stickXY = document.getElementById('stickXY');
+    const displayXY = document.getElementById('displayXY');
+    const joystickZ = document.getElementById('joystickZ');
+    const stickZ = document.getElementById('stickZ');
+    const displayZ = document.getElementById('displayZ');
+  
+    function handleJoystickMove(stick, display, axis) {
+      return function(event) {
+        const rect = stick.parentElement.getBoundingClientRect();
+        const x = Math.max(Math.min(event.clientX - rect.left, rect.width), 0);
+        const y = Math.max(Math.min(event.clientY - rect.top, rect.height), 0);
+        
+        // Calculate the center of the stick
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        // Update stick position
+        stick.style.left = `${x - stick.clientWidth / 2}px`;
+        stick.style.top = `${y - stick.clientHeight / 2}px`;
+  
+        // Normalize values to -100 to 100
+        const normalizedX = ((x - centerX) / centerX * 100).toFixed(2);
+        const normalizedY = ((centerY - y) / centerY * 100).toFixed(2);
+  
+        if (axis === 'xy') {
+          display.textContent = `X: ${Math.max(-100, Math.min(100, normalizedX))}, Y: ${Math.max(-100, Math.min(100, normalizedY))}`;
+        } else if (axis === 'z') {
+          display.textContent = `Z: ${Math.max(-100, Math.min(100, normalizedY))}`;
+        }
+      };
+    }
+  
+    function resetJoystick(stick) {
+      stick.style.left = `50%`;
+      stick.style.top = `50%`;
+      stick.style.transform = `translate(-50%, -50%)`;
+    }
+  
+    joystickXY.addEventListener('mousedown', function(event) {
+      const moveHandler = handleJoystickMove(stickXY, displayXY, 'xy');
+      document.addEventListener('mousemove', moveHandler);
+      document.addEventListener('mouseup', function() {
+        document.removeEventListener('mousemove', moveHandler);
+        resetJoystick(stickXY);
+        displayXY.textContent = `X: 0, Y: 0`; // Reset display to center
+      }, { once: true });
+    });
+  
+    joystickZ.addEventListener('mousedown', function(event) {
+      const moveHandler = handleJoystickMove(stickZ, displayZ, 'z');
+      document.addEventListener('mousemove', moveHandler);
+      document.addEventListener('mouseup', function() {
+        document.removeEventListener('mousemove', moveHandler);
+        resetJoystick(stickZ);
+        displayZ.textContent = `Z: 0`; // Reset display to center
+      }, { once: true });
+    });
+  
+    // Function to update the current time and date
+    function updateCurrentTime() {
+      const now = new Date();
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+      const formattedDate = now.toLocaleDateString(undefined, options);
+      document.getElementById('currentDateTime').textContent = `Current Time: ${formattedDate}`;
+    }
+  
+    // Update the current time and date every second
+    setInterval(updateCurrentTime, 1000);
+    updateCurrentTime(); // Initial call to set the time immediately
+  
+    // Restart printer function
+    function restartPrinter() {
+      alert("Printer restarting...");
+      // Add actual restart logic here
+    }
+  </script>
+  
+</body>
+</html>
