@@ -48,7 +48,7 @@ void setup() {
         }
 
         if (password == adminPassword) {
-            
+            SentAdminPassword = password;
             String response = "{\"success\": true}";
             request->send(200, "application/json", response);
         } else {
@@ -59,16 +59,13 @@ void setup() {
 
     // Handle the request to clear the reservation file
     server.on("/clear-reservation-file", HTTP_POST, [](AsyncWebServerRequest *request) {
-        String password = "";
-        if (request->hasParam("password", true)) {
-            password = request->getParam("password", true)->value();
-        }
-
-        if (password == adminPassword) {
+        if (SentAdminPassword == adminPassword) {
+            SentAdminPassword = "";
             clearReservationFile();
             request->send(200, "text/plain", "Reservation file cleared");
         } else {
             request->send(401, "text/plain", "Unauthorized");
+            SentAdminPassword = "";
         }
     });
 

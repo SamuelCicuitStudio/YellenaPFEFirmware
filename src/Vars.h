@@ -15,3 +15,4 @@ const char* reservationFile = "/reservations.json";
     const int tzOffset = 3600; // 1 hour offset
 
     String adminPassword = "Mypassword"; // Replace with your admin password
+    String SentAdminPassword = ""; // From the server

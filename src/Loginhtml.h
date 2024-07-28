@@ -247,34 +247,46 @@ const char* reservationsHtmlContent = R"rawliteral(
             </form>
         </div>
     </div>
-    <script>
-        document.getElementById('clearListBtn').addEventListener('click', function(event) {
-            event.preventDefault();
-            document.getElementById('passwordPrompt').classList.remove('hidden');
-        });
+   <script>
+    document.getElementById('clearListBtn').addEventListener('click', function(event) {
+        event.preventDefault();
+        document.getElementById('passwordPrompt').classList.remove('hidden');
+    });
 
-        document.getElementById('passwordForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const formData = new FormData(this);
+    document.getElementById('passwordForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
 
-            fetch('/check-password', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    
-                } else {
-                    alert('Incorrect password.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while checking the password.');
-            });
+        fetch('/check-password', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                fetch('/clear-reservation-file', { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Reservation list cleared successfully.');
+                            window.location.reload(); // Refresh the page
+                        } else {
+                            alert('Failed to clear reservation list.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while clearing the reservation list.');
+                    });
+            } else {
+                alert('Incorrect password.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while checking the password.');
         });
-    </script>
+    });
+</script>
 </body>
 </html>
 
