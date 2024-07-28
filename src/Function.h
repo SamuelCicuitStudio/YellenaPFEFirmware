@@ -49,6 +49,7 @@ String getCurrentDate() {
 
 /********************************************************************************************************************************************/
 // Handle reservation form submission
+// Handle reservation form submission
 void handleReservation(AsyncWebServerRequest *request) {
     if (request->method() == HTTP_POST) {
         String name = request->arg("name");
@@ -57,17 +58,28 @@ void handleReservation(AsyncWebServerRequest *request) {
         String id = request->arg("id");
         String date = getCurrentDate();
 
-        DynamicJsonDocument doc(1024);
+        DynamicJsonDocument doc(2048); // Increased size to handle more data
 
         // Read existing reservations
         File file = SPIFFS.open(reservationFile, "r");
         if (file) {
-            deserializeJson(doc, file);
+            DeserializationError error = deserializeJson(doc, file);
+            if (error) {
+                Serial.println("Failed to deserialize JSON");
+                request->send(500, "text/plain", "Internal Server Error");
+                file.close();
+                return;
+            }
             file.close();
         }
 
+        // If the file is empty or does not exist, initialize a new JSON array
+        if (!doc.is<JsonArray>()) {
+            doc.to<JsonArray>();
+        }
+
         // Add new reservation
-        JsonArray reservations = doc.to<JsonArray>();
+        JsonArray reservations = doc.as<JsonArray>();
         JsonObject reservation = reservations.createNestedObject();
         reservation["name"] = name;
         reservation["lastName"] = lastName;
@@ -77,6 +89,11 @@ void handleReservation(AsyncWebServerRequest *request) {
 
         // Write updated reservations
         file = SPIFFS.open(reservationFile, "w");
+        if (!file) {
+            Serial.println("Failed to open file for writing");
+            request->send(500, "text/plain", "Internal Server Error");
+            return;
+        }
         serializeJson(doc, file);
         file.close();
 
