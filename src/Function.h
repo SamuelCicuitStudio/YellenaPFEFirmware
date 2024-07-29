@@ -54,9 +54,8 @@ String getCurrentDate() {
     
     return String(buffer);
 }
-
+;
 /********************************************************************************************************************************************/
-// Handle reservation form submission
 // Handle reservation form submission
 void handleReservation(AsyncWebServerRequest *request) {
     if (request->method() == HTTP_POST) {
@@ -71,13 +70,7 @@ void handleReservation(AsyncWebServerRequest *request) {
         // Read existing reservations
         File file = SPIFFS.open(reservationFile, "r");
         if (file) {
-            DeserializationError error = deserializeJson(doc, file);
-            if (error) {
-                Serial.println("Failed to deserialize JSON");
-                request->send(500, "text/plain", "Internal Server Error");
-                file.close();
-                return;
-            }
+            deserializeJson(doc, file);
             file.close();
         }
 

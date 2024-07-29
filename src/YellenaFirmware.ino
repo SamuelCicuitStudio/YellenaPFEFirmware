@@ -7,7 +7,8 @@ void setup() {
     initEEPROM();// Initialize EEPROM
     LoadStoredParameter();// Load Wifi credential From EEPROM
     connectToWiFi();
-    initFS();
+    initFS();// init FS
+   
 
     // Serve the reservation HTML page
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
