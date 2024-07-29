@@ -20,6 +20,14 @@ void handleFileUpload(AsyncWebServerRequest *request, const String& filename, si
 void clearReservationFile();
 // Initialize NTP client for time synchronization
 void initTime();
+void storeString(int startingAddress, String data);
+String readString(int addrOffset);
+// Function to initialize EEPROM if not already initialized
+void initEEPROM();
+// Function to load stored parameters from EEPROM
+void LoadStoredParameter();
+bool connectToWiFi();
+void startAPMode();
 /********************************************************************************************************************************************/
 // Initialize the file system
 void initFS() {
@@ -178,3 +186,125 @@ void initTime() {
     // Initialize NTP Client to get time from the network
     configTime(tzOffset, 0, "pool.ntp.org"); // Configure time with NTP server
 }
+
+/**********************************************************************************************************************************/
+// Functions to store a string into EEPROM
+void storeString(int startingAddress, String data) {
+  byte len = data.length(); // Get the length of the string
+
+  EEPROM.write(startingAddress, len); // Write the length of the string
+  
+  for (int i = 0; i < len; i++) {
+    EEPROM.write(startingAddress + 1 + i, data[i]); // Write each character of the string
+  }
+
+  EEPROM.commit(); // Commit the changes to EEPROM
+  delay(1000);
+  //LoadStoredParameter();
+}
+/**********************************************************************************************************************************/
+// Functions to read a string from EEPROM
+String readString(int addrOffset) {
+  int newStrLen = EEPROM.read(addrOffset); // Read the length of the stored string
+  char data[newStrLen + 1]; // Create a character array to hold the string data
+
+  for (int i = 0; i < newStrLen; i++)
+  {
+    data[i] = EEPROM.read(addrOffset + 1 + i); // Read each character of the string
+  }
+  data[newStrLen] = '\0'; // Null-terminate the character array
+
+  return String(data); // Convert the character array to a String object
+}
+
+/**********************************************************************************************************************************/
+// Function to initialize EEPROM if not already initialized
+void initEEPROM() {
+  while (!isEEPROMInitialized) {
+    if (EEPROM.begin(EEPROM_SIZE)) {
+      isEEPROMInitialized = true;
+      Serial.println("EEPROM initialized successfully.");
+    } else {
+      Serial.println("EEPROM initialization failed. Retrying...");
+      delay(1000); // Wait for 1 second before retrying
+    }
+  }
+ }
+ /**********************************************************************************************************************************/
+ // Function to load stored parameters from EEPROM
+void LoadStoredParameter() {
+  Serial.println("Executing LoadStoredParameter");
+  WIFI_SSID = readString(WIFI_SSID_ADD);
+  WIFI_PASS = readString(WIFI_PASS_ADD);
+  Serial.println(" Done Executing LoadStoredParameter");
+
+ }
+
+ /**********************************************************************************************************************************/
+bool connectToWiFi() {
+  uint8_t maxRetries = 5;
+  // Turn on the WiFi module and set to station mode
+  Serial.println("Enabling WiFi STA...");
+  WiFi.mode(WIFI_STA);//turnon the wifi module
+  delay(1000);
+  for (int attempt = 0; attempt < maxRetries; attempt++) {
+    WiFi.begin(WIFI_SSID.c_str(), WIFI_PASS.c_str());
+    Serial.print("Connecting to WiFi");
+    int retries = 0;
+    
+    while (WiFi.status() != WL_CONNECTED && retries < 20) {
+      delay(500);
+      Serial.print(".");
+      retries++;
+    }
+
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println("Connected!");
+      Serial.print("IP Address: ");
+      Serial.println(WiFi.localIP());
+      return true;
+    } else {
+      Serial.println("Failed to connect to WiFi. Retrying...");     
+    }
+  }
+  Serial.println("Failed to connect to WiFi after multiple attempts. starting AP mode...");
+  startAPMode();
+  //esp_restart();//restart esp32
+  return false;
+}
+
+/**********************************************************************************************************************************/
+void startAPMode() {
+  WiFi.softAP(AP_SSID, AP_PASS);
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(IP);
+
+ server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String html = String(apmodehtmlContent);
+    html.replace("%SSID%", WIFI_SSID);
+    html.replace("%PASS%", WIFI_PASS);
+
+    request->send(200, "text/html", html);
+  });
+
+ server.on("/get", HTTP_POST, [](AsyncWebServerRequest *request) {
+   
+    // Check if the parameters are present
+    if (request->hasParam("ssid", true) && request->hasParam("pass", true)) {
+        
+        Serial.println("Saving parameters!");
+        delay(1000);
+        storeString(WIFI_SSID_ADD,   request->getParam("ssid", true)->value());
+        storeString(WIFI_PASS_ADD,   request->getParam("pass", true)->value());
+        Serial.println("Parameters saved.");
+        delay(1000);
+        Serial.println("Restarting the device!");
+        delay(1000);
+        esp_restart();//restart esp32
+    }    
+    // Send a response back to the client
+    request->send(200, "text/html", "Settings Saved. ESP32 is restarting...");
+ });
+  server.begin();
+ }

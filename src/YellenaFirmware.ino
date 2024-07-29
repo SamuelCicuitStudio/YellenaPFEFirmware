@@ -3,20 +3,11 @@
 
 void setup() {
     Serial.begin(9600);
-    // Initialize time
-    initTime();
-
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(1000);
-        Serial.print(".");
-    }
-    Serial.println("\nConnected to WiFi");
-    // Print the IP address
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.localIP());
-   initFS();
-
+    initTime();    // Initialize time
+    initEEPROM();// Initialize EEPROM
+    LoadStoredParameter();// Load Wifi credential From EEPROM
+    connectToWiFi();
+    initFS();
 
     // Serve the reservation HTML page
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {

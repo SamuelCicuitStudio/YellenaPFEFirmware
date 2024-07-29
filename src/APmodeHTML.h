@@ -1,3 +1,7 @@
+#ifndef APMODEHTML_H
+#define APMODEHTML_H
+
+const char* apmodehtmlContent = R"rawliteral(
 <!DOCTYPE html>
 <html>
 <head>
@@ -169,3 +173,6 @@
   </script>
 </body>
 </html>
+)rawliteral";
+
+#endif
