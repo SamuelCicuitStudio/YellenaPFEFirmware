@@ -98,7 +98,8 @@ void handleReservation(AsyncWebServerRequest *request) {
         serializeJson(doc, file);
         file.close();
 
-        request->send(200, "text/html", "Reservation successful! <a href='/'>Go back</a>");
+        // Send back the HTML page from confirmreservation.h
+        request->send(200, "text/html", confirmReservationPage);
     } else {
         request->send(405, "text/plain", "Method Not Allowed");
     }

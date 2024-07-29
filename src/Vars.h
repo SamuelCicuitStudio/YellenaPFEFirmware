@@ -9,11 +9,12 @@
 #include "Loginhtml.h"        // Include the HTML header file
 #include "DownloadHTML.h" // Include the file upload HTML header file
 #include "APmodeHTML.h"
+#include "ConfirmReservationHTML.h"
 
 #define EEPROM_SIZE 256 // Size of EEPROM in bytes
 #define WIFI_SSID_ADD 10
 #define WIFI_PASS_ADD 50
-#define AP_SSID "YelliWifi"
+#define AP_SSID "Yelli3DPrinterPFEWifi"
 #define AP_PASS "1234567890"
 
 String WIFI_SSID = "";
