@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        video.background-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+        .gradient-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(270deg, rgba(255, 0, 122, 0.5), rgba(0, 210, 255, 0.5), rgba(255, 140, 0, 0.5), rgba(142, 45, 226, 0.5));
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            z-index: 2;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .container {
+            position: relative;
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            box-sizing: border-box;
+            z-index: 3;
+        }
+        img.logo {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        p {
+            color: #555;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px 0;
+            padding: 10px 20px;
+            background-color: #ae231c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #e82c22;
+        }
+        .button i {
+            margin-right: 8px; /* Space between icon and text */
+        }
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            p {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <video class="background-video" autoplay loop muted>
+        <source src="/lib/Webpage/videos/backgroundVideo.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <div class="gradient-overlay"></div>
+    <div class="container">
+        <img src="/lib/Webpage/images/LogoESPRIimage.jpg" alt="Logo" class="logo">
+        <h1>Welcome, <span id="adminName"></span>!</h1>
+        <p>You have successfully logged in to the Admin Dashboard.</p>
+        <p>
+            <a href="/lib/Webpage/admin/AdminDashboard.html" class="button" id="goToDashboardButton">
+                <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+            </a>
+        </p>
+        <p>
+            <a href="/lib/Webpage/Login.html" class="button">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </p>
+    </div>
+
+    <script>
+        // Retrieve the admin's name from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const adminName = urlParams.get('name') || 'Admin'; // Default to 'Admin' if not found
+        document.getElementById('adminName').textContent = adminName;
+
+        // Store the admin's name in localStorage
+        localStorage.setItem('currentAdminName', adminName);
+
+        // Redirect to the dashboard
+        document.getElementById('goToDashboardButton').addEventListener('click', function() {
+            window.location.href = this.href;
+        });
+    </script>
+</body>
+
+</html>

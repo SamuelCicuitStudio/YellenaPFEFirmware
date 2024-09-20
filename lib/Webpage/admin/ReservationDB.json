@@ -1,0 +1,47 @@
+[
+    {
+        "email": "Dupont.Alice@esprit.com",
+        "id": "S12345",
+        "date": "2024-09-21",
+        "time": "10:00 AM",
+        "class": "3 MecaT2",
+        "nom": "Dupont",
+        "prenom": "Alice"
+    },
+    {
+        "email": "Martin.Samuel@esprit.com",
+        "id": "S67890",
+        "date": "2024-09-22",
+        "time": "11:00 AM",
+        "class": "3 MecaT3",
+        "nom": "Martin",
+        "prenom": "Samuel"
+    },
+    {
+        "email": "Bernard.Claire@esprit.com",
+        "id": "S54321",
+        "date": "2024-09-23",
+        "time": "02:00 PM",
+        "class": "3 MecaT4",
+        "nom": "Bernard",
+        "prenom": "Claire"
+    },
+    {
+        "email": "Johnson.Mike@esprit.com",
+        "id": "S98765",
+        "date": "2024-09-24",
+        "time": "09:00 AM",
+        "class": "3 MecaT5",
+        "nom": "Johnson",
+        "prenom": "Mike"
+    },
+    {
+        "email": "Taylor.Sarah@esprit.com",
+        "id": "S13579",
+        "date": "2024-09-25",
+        "time": "01:00 PM",
+        "class": "3 MecaT6",
+        "nom": "Taylor",
+        "prenom": "Sarah"
+    }
+]

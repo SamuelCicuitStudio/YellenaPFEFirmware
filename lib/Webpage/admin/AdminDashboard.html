@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            color: #333;
+        }
+        .sidebar {
+            width: 450px;
+            padding: 10px;
+            background: rgba(240, 240, 240, 0.9);
+            border-right: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+            background: #fff;
+            overflow-y: auto;
+        }
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 8px;
+            background-color: #ae231c;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 8px;
+        }
+        button:hover {
+            background-color: #e82c22;
+        }
+        .form-section {
+            margin: 10px 0;
+            padding: 15px;
+            background: rgba(237, 222, 222, 0.9);
+            border-radius: 8px;
+        }
+        input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="time"] {
+            padding: 6px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: calc(100% - 12px);
+        }
+        .list-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: #f9f9f9;
+            padding: 10px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        .table th, .table td {
+            border: 1px solid #ae231c;
+            padding: 8px;
+            text-align: left;
+        }
+        .table th {
+            background-color: #ae231c;
+            color: white;
+        }
+        .edit-button, .remove-button {
+            background-color: #fff;
+            border: 1px solid #ae231c;
+            color: #ae231c;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 4px 8px;
+            margin-left: 5px;
+        }
+        .edit-button:hover, .remove-button:hover {
+            background-color: #ae231c;
+            color: white;
+        }
+        .logo {
+            display: block;
+            margin: 0 auto 10px;
+            width: 150px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <img src="/lib/Webpage/images/LogoESPRIimage.jpg" alt="Logo" class="logo">
+        <h2>Welcome, <span id="currentAdminName">Admin Name</span></h2>
+        <div class="button-container">
+            <button id="adminManagementButton">Admin Management</button>
+            <button id="reservationManagementButton">Reservation Management</button>
+            <button id="maintenanceButton" onclick="location.href='maintenance.html'">Maintenance</button>
+        </div>
+        <div class="form-section" id="adminForm" style="display: none;">
+            <h2>Add New Admin</h2>
+            <input type="text" id="newAdminName" placeholder="Name" required>
+            <input type="email" id="newAdminEmail" placeholder="Email" required>
+            <input type="text" id="newAdminId" placeholder="ID" required>
+            <input type="password" id="newAdminPassword" placeholder="Password" required>
+            <button id="addAdminButton">Add Admin</button>
+        </div>
+        <div class="form-section" id="reservationForm" style="display: none;">
+            <h2>Add New Reservation</h2>
+            <input type="text" id="newReservationNom" placeholder="Last Name" required>
+            <input type="text" id="newReservationPrenom" placeholder="First Name" required>
+            <input type="email" id="newReservationEmail" placeholder="Email" required>
+            <input type="text" id="newReservationId" placeholder="ID" required>
+            <input type="date" id="newReservationDate" required>
+            <input type="time" id="newReservationTime" required>
+            <input type="text" id="newReservationClass" placeholder="Class" required>
+            <button id="addReservationButton">Add Reservation</button>
+        </div>
+        <button id="logoutButton" onclick="location.href='/lib/Webpage/Login.html'">Logout</button>
+    </div>
+
+    <div class="content">
+        <h2>Manage Admins & Reservations</h2>
+        <div id="managementSection">
+            <!-- Content will be dynamically populated here -->
+        </div>
+    </div>
+
+    <script>
+        let adminDB = [];
+        let reservationDB = [];
+        const currentAdminName = localStorage.getItem('currentAdminName') || 'Admin'; // Retrieve from local storage
+        document.getElementById('currentAdminName').innerText = currentAdminName;
+    
+        async function fetchAdminData() {
+            const response = await fetch('adminDB.json');
+            adminDB = await response.json();
+            renderAdminList();
+        }
+    
+        async function fetchReservationData() {
+            const response = await fetch('ReservationDB.json');
+            reservationDB = await response.json();
+            renderReservationList();
+        }
+    
+        function renderAdminList() {
+            const container = document.createElement('div');
+            const table = document.createElement('table');
+            table.className = 'table';
+            const header = table.createTHead();
+            const headerRow = header.insertRow();
+            headerRow.innerHTML = `<th>Name</th><th>Email</th><th>ID</th><th>Actions</th>`;
+    
+            const body = table.createTBody();
+            adminDB.forEach(admin => {
+                const row = body.insertRow();
+                row.innerHTML = `<td>${admin.name}</td>
+                                 <td>${admin.email}</td>
+                                 <td>${admin.id}</td>
+                                 <td>
+                                     <button class="edit-button" onclick="editAdmin('${admin.id}')">Edit</button>
+                                     <button class="remove-button" onclick="removeAdmin('${admin.id}')">Remove</button>
+                                 </td>`;
+            });
+            container.appendChild(table);
+            document.getElementById('managementSection').innerHTML = '';
+            document.getElementById('managementSection').appendChild(container);
+        }
+    
+        function renderReservationList() {
+            const container = document.createElement('div');
+            const table = document.createElement('table');
+            table.className = 'table';
+            const header = table.createTHead();
+            const headerRow = header.insertRow();
+            headerRow.innerHTML = `<th>Name</th><th>Email</th><th>ID</th><th>Date</th><th>Time</th><th>Class</th><th>Actions</th>`;
+    
+            const body = table.createTBody();
+            reservationDB.forEach(reservation => {
+                const row = body.insertRow();
+                row.innerHTML = `<td>${reservation.nom} ${reservation.prenom}</td>
+                                 <td>${reservation.email}</td>
+                                 <td>${reservation.id}</td>
+                                 <td>${reservation.date}</td>
+                                 <td>${reservation.time}</td>
+                                 <td>${reservation.class}</td>
+                                 <td>
+                                     <button class="edit-button" onclick="editReservation('${reservation.id}')">Edit</button>
+                                     <button class="remove-button" onclick="removeReservation('${reservation.id}')">Remove</button>
+                                 </td>`;
+            });
+            container.appendChild(table);
+            document.getElementById('managementSection').innerHTML = '';
+            document.getElementById('managementSection').appendChild(container);
+        }
+    
+        document.getElementById('adminManagementButton').addEventListener('click', function() {
+            document.getElementById('adminForm').style.display = 'block';
+            document.getElementById('reservationForm').style.display = 'none';
+            fetchAdminData();
+        });
+    
+        document.getElementById('reservationManagementButton').addEventListener('click', function() {
+            document.getElementById('reservationForm').style.display = 'block';
+            document.getElementById('adminForm').style.display = 'none';
+            fetchReservationData();
+        });
+    
+        document.getElementById('addAdminButton').addEventListener('click', async function() {
+            const newAdmin = {
+                name: document.getElementById('newAdminName').value,
+                email: document.getElementById('newAdminEmail').value,
+                id: document.getElementById('newAdminId').value,
+                password: document.getElementById('newAdminPassword').value,
+            };
+            adminDB.push(newAdmin);
+            await saveAdminData();
+            renderAdminList();
+            document.getElementById('newAdminName').value = '';
+            document.getElementById('newAdminEmail').value = '';
+            document.getElementById('newAdminId').value = '';
+            document.getElementById('newAdminPassword').value = '';
+        });
+    
+        document.getElementById('addReservationButton').addEventListener('click', async function() {
+            const newReservation = {
+                nom: document.getElementById('newReservationNom').value,
+                prenom: document.getElementById('newReservationPrenom').value,
+                email: document.getElementById('newReservationEmail').value,
+                id: document.getElementById('newReservationId').value,
+                date: document.getElementById('newReservationDate').value,
+                time: document.getElementById('newReservationTime').value,
+                class: document.getElementById('newReservationClass').value,
+            };
+            reservationDB.push(newReservation);
+            await saveReservationData();
+            renderReservationList();
+            document.getElementById('newReservationNom').value = '';
+            document.getElementById('newReservationPrenom').value = '';
+            document.getElementById('newReservationEmail').value = '';
+            document.getElementById('newReservationId').value = '';
+            document.getElementById('newReservationDate').value = '';
+            document.getElementById('newReservationTime').value = '';
+            document.getElementById('newReservationClass').value = '';
+        });
+    
+        async function saveAdminData() {
+            await fetch('adminDB.json', {
+                method: 'POST',
+                body: JSON.stringify(adminDB),
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+    
+        async function saveReservationData() {
+            await fetch('ReservationDB.json', {
+                method: 'POST',
+                body: JSON.stringify(reservationDB),
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+    
+        function editAdmin(adminId) {
+            // Edit admin functionality (not implemented)
+        }
+    
+        function removeAdmin(adminId) {
+            adminDB = adminDB.filter(admin => admin.id !== adminId);
+            saveAdminData().then(renderAdminList);
+        }
+    
+        function editReservation(reservationId) {
+            // Edit reservation functionality (not implemented)
+        }
+    
+        function removeReservation(reservationId) {
+            reservationDB = reservationDB.filter(reservation => reservation.id !== reservationId);
+            saveReservationData().then(renderReservationList);
+        }
+    </script>
+    
+</body>
+</html>
